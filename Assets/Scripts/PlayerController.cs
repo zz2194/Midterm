@@ -5,6 +5,8 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
 
+    public static PlayerController instance;
+
     [Header("Movement")]
     public float speed;
     public float maxspeed;
@@ -16,10 +18,16 @@ public class PlayerController : MonoBehaviour
     public bool canPick;
     public bool picked;
     public TMPro.TMP_Text pickupText;
+    public int pickN;
+
+    [Header("Game Variables")]
+    public int points;
+
 
     // Start is called before the first frame update
     void Start()
     {
+        instance = this;
         rgbd = GetComponent<Rigidbody>();
     }
 
@@ -46,7 +54,7 @@ public class PlayerController : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Space) && grounded)
         {
-            rgbd.AddRelativeForce(Vector3.up * speed * 30);
+            rgbd.AddRelativeForce(Vector3.up * speed * 90);
         }
     }
 
@@ -54,16 +62,24 @@ public class PlayerController : MonoBehaviour
     {
         if (canPick)
         {
-            if (Input.GetKeyDown(KeyCode.J))
+            if (Input.GetKeyDown(KeyCode.K))
+            {
+                pickN += 1;
+            }
+            if (pickN == 1 && !picked)
             {
                // pick.transform.position = gameObject.transform.position + new Vector3(0, 2.3f, 0);
                 pick.GetComponent<Rigidbody>().isKinematic = true;
                 picked = true;
             }
-            if (Input.GetKeyDown(KeyCode.K))
+            if (pickN == 2 && picked)
             {
                 pick.GetComponent<Rigidbody>().isKinematic = false;
                 picked = false;
+            }
+            if(pickN >= 3)
+            {
+                pickN = 1;
             }
         }
         if (picked)
@@ -72,18 +88,18 @@ public class PlayerController : MonoBehaviour
             if(pickupText!= null)
             pickupText.text = "Press 'K' to Release";
             pick.transform.position = gameObject.transform.position + new Vector3(0, 2.3f, 0);
-            pick.transform.eulerAngles = new Vector3(0, 0, 0);
+            //pick.transform.eulerAngles = new Vector3(0, 0, 0);
         }
         else
         {
             if(pickupText != null)
-            pickupText.text = "Press 'J' to Pick Up";
+            pickupText.text = "Press 'K' to Pick Up";
         }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.name == "Ground")
+        if (collision.gameObject.name.Contains("Ground"))
         {
             grounded = true;
         }
@@ -91,7 +107,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionExit(Collision collision)
     {
-        if(collision.gameObject.name == "Ground")
+        if(collision.gameObject.name.Contains("Ground"))
         {
             grounded = false;
         }
@@ -99,17 +115,27 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if(other.tag == "Pickupable")
+        if(other.tag == "Pickupable" && !picked)
         {
             pick = other.transform.parent.gameObject;
             canPick = true;
+        }
+        if (other.name.Contains("Door"))
+        {
+            if (Input.GetKeyDown(KeyCode.Return))
+            {
+                gameObject.transform.position = new Vector3(gameObject.transform.position.x,
+                                                            other.GetComponent<DoorManager>().linked.transform.position.y,
+                                                            other.GetComponent<DoorManager>().linked.transform.position.z);
+            }
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.tag == "Pickupable")
+        if (other.tag == "Pickupable" && !picked)
         {
+
             pickupText = null;
             pick = null;
             canPick = false;
