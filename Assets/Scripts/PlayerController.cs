@@ -20,8 +20,21 @@ public class PlayerController : MonoBehaviour
     public TMPro.TMP_Text pickupText;
     public int pickN;
 
+    [Header("UI Stuff")]
+    public GameObject hpBar;
+    public TMPro.TMP_Text score;
+    public GameObject blackPanel;
+
+    [Header("Checkpoints")]
+    public GameObject checkpoint;
+
     [Header("Game Variables")]
     public int points;
+    public float time;
+    public float maxTime;
+    public bool inGame;
+    public bool dead;
+
 
 
     // Start is called before the first frame update
@@ -36,6 +49,8 @@ public class PlayerController : MonoBehaviour
     {
         PickUp();
         Movement();
+        MoveHpBar();
+        score.text = points + "/50 pts";
     }
 
     void Movement()
@@ -97,6 +112,29 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void MoveHpBar()
+    {
+        time = maxTime - Time.time/30f;
+        hpBar.GetComponent<RectTransform>().localScale = new Vector3(time, hpBar.GetComponent<RectTransform>().localScale.y);
+        if(time <= 0f)
+        {
+            StartCoroutine(death());
+        }
+    }
+
+    IEnumerator death()
+    {
+
+        dead = true;
+        blackPanel.GetComponent<Animation>().Play();
+        yield return new WaitForSeconds(5f);
+        //Re-Start Everything
+        transform.position = checkpoint.transform.position;
+        time = 1;
+        points = 0;
+        dead = false;
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.name.Contains("Ground"))
@@ -113,27 +151,43 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.name.Contains("Checkpoint"))
+        {
+            checkpoint = other.gameObject;
+        }
+    }
+
     private void OnTriggerStay(Collider other)
     {
-        if(other.tag == "Pickupable" && !picked)
+        if(other.CompareTag("Pickupable") && !picked)
         {
             pick = other.transform.parent.gameObject;
             canPick = true;
         }
         if (other.name.Contains("Door"))
         {
-            if (Input.GetKeyDown(KeyCode.Return))
+            if (Input.GetKeyDown(KeyCode.Return) && other.GetComponent<DoorManager>().locked == false)
             {
                 gameObject.transform.position = new Vector3(gameObject.transform.position.x,
                                                             other.GetComponent<DoorManager>().linked.transform.position.y,
                                                             other.GetComponent<DoorManager>().linked.transform.position.z);
             }
         }
+        if (other.name.Contains("ReceiverButton"))
+        {
+            if (Input.GetKeyDown(KeyCode.K))
+            {
+                print("TriggerPushed");
+                GameObject.Find("Receiver").GetComponent<ReceiveManager>().triggerPushed = true;
+            }
+        }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.tag == "Pickupable" && !picked)
+        if (other.CompareTag("Pickupable") && !picked)
         {
 
             pickupText = null;

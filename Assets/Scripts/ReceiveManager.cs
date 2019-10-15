@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class ReceiveManager : MonoBehaviour
 {
-    public List<GameObject> collects;
-    public int triggerPushed;
+    public bool[] collects; // 0: Scissor 1: Scalpel 2: Syringe 3: Surgical Tape 4: Tweezers
+    public bool triggerPushed;
 
     // Start is called before the first frame update
     void Start()
@@ -16,30 +16,101 @@ public class ReceiveManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (triggerPushed == 2)
+        if (triggerPushed)
         {
-            //Combo1
-            if (collects.Contains(GameObject.Find("Scissor")) && collects.Contains(GameObject.Find("Tape")))
+            if (collects[0] == true && collects[1] == true && collects[2] == true && collects[3] == true && collects[4] == true)
+            {
+                PlayerController.instance.points += 7;
+                PlayerController.instance.score.gameObject.GetComponent<Animation>().Play();
+                PlayerController.instance.maxTime += 0.5f;
+            }
+            if (collects[0] == true && collects[2] == true && collects[4] == true)
+            {
+                PlayerController.instance.points += 5;
+                PlayerController.instance.score.gameObject.GetComponent<Animation>().Play();
+                PlayerController.instance.maxTime += 0.3f;
+            }
+            if (collects[0] == true && collects[3] == true)
             {
                 PlayerController.instance.points += 3;
-                collects.Clear();
+                PlayerController.instance.score.gameObject.GetComponent<Animation>().Play();
+                PlayerController.instance.maxTime += 0.1f;
+            }
+            for (int i = 0; i < 5; i++)
+            {
+                collects[i] = false;
+            }
+            triggerPushed = false;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Pickupable"))
+        {
+            if (other.name.Contains("Scissor"))
+            {
+                collects[0] = true;
+            }
+
+            if (other.name.Contains("Scalpel"))
+            {
+                collects[1] = true;
+            }
+
+            if (other.name.Contains("Syringe"))
+            {
+                collects[2] = true;
+            }
+
+            if (other.name.Contains("Tape"))
+            {
+                collects[3] = true;
+            }
+
+            if (other.name.Contains("Tweezers"))
+            {
+                collects[4] = true;
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Pickupable"))
+        {
+            if (other.name.Contains("Scissor"))
+            {
+                collects[0] = false;
+            }
+
+            if (other.name.Contains("Scalpel"))
+            {
+                collects[1] = false;
+            }
+
+            if (other.name.Contains("Syringe"))
+            {
+                collects[2] = false;
+            }
+
+            if (other.name.Contains("Tape"))
+            {
+                collects[3] = false;
+            }
+
+            if (other.name.Contains("Tweezers"))
+            {
+                collects[4] = false;
             }
         }
     }
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag("Pickupable"))
+        if (triggerPushed && other.CompareTag("Pickupable"))
         {
-            if (other.name.Contains("Scissor"))
-            {
-                collects.Add(other.gameObject);
-            }
-
-            if (other.name.Contains("Tape"))
-            {
-                collects.Add(other.gameObject);
-            }
+            Destroy(other.gameObject);
         }
     }
 

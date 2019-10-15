@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class PickupManager : MonoBehaviour
 {
-    public int property; // 1: Scissor 2: Scalpel 3: Syringe 4: Surgical Tape 5: Tweezers
+    public int property; // 0: Scissor 1: Scalpel 2: Syringe 3: Surgical Tape 4: Tweezers
     // Combination:
-    // 1+4 [3pts]
-    // 1+3+5 [5pts]
-    // 1+2+3+4+5 [7pts]
+    // 0+3 [3pts]
+    // 0+2+4 [5pts]
+    // 0+1+2+3+4 [7pts]
 
     public TMPro.TMP_Text note;
     public GameObject player;
