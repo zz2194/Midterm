@@ -10,7 +10,7 @@ public class SmoothCamFollow : MonoBehaviour
 
     void Update()
     {
-        Vector3 targetPosition = target.TransformPoint(new Vector3(10, 0, 0));
+        Vector3 targetPosition = target.transform.position + new Vector3(8, 3, 0);
         transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothTime);
     }
 }

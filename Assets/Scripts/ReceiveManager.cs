@@ -22,26 +22,32 @@ public class ReceiveManager : MonoBehaviour
             {
                 PlayerController.instance.points += 7;
                 PlayerController.instance.score.gameObject.GetComponent<Animation>().Play();
-                PlayerController.instance.maxTime += 0.5f;
+                PlayerController.instance.time += 1f;
             }
             if (collects[0] == true && collects[2] == true && collects[4] == true)
             {
                 PlayerController.instance.points += 5;
                 PlayerController.instance.score.gameObject.GetComponent<Animation>().Play();
-                PlayerController.instance.maxTime += 0.3f;
+                PlayerController.instance.time += 0.7f;
             }
             if (collects[0] == true && collects[3] == true)
             {
                 PlayerController.instance.points += 3;
                 PlayerController.instance.score.gameObject.GetComponent<Animation>().Play();
-                PlayerController.instance.maxTime += 0.1f;
+                PlayerController.instance.time += 0.4f;
             }
             for (int i = 0; i < 5; i++)
             {
                 collects[i] = false;
             }
-            triggerPushed = false;
+            StartCoroutine(TurnOffTrigger());
         }
+    }
+
+    IEnumerator TurnOffTrigger()
+    {
+        yield return new WaitForSeconds(0.5f);
+        triggerPushed = false;
     }
 
     private void OnTriggerEnter(Collider other)
